@@ -1,0 +1,43 @@
+diff -aurN jack_capture-0.9.70.orig/Makefile jack_capture-0.9.70/Makefile
+--- jack_capture-0.9.70.orig/Makefile	2013-03-01 21:16:47.048543605 +0100
++++ jack_capture-0.9.70/Makefile	2013-03-01 21:32:02.689995816 +0100
+@@ -1,4 +1,4 @@
+-PREFIX ?= /usr/local
++PREFIX ?= /usr
+ bindir = $(PREFIX)/bin
+ 
+ VERSION=0.9.70
+@@ -6,15 +6,15 @@
+ CC=gcc
+ CPP=g++
+ 
+-OPTIMIZE=-O3
++OPTIMIZE=$(OPTFLAGS)
+ #OPTIMIZE=-O0 -g
+ 
+ COMPILEFLAGS=$(CFLAGS) $(OPTIMIZE) -DVERSION=\"$(VERSION)\" -Wall -Wextra -Wno-unused
+-LINKFLAGS=$(LDFLAGS) -ljack -lsndfile -lm -lpthread -lrt
++LINKFLAGS=$(LDFLAGS) -lmp3lame -llo -ljack -lsndfile -lm -lpthread -lrt
+ 
+-targets = jack_capture
++targets = jack_capture jack_capture_gui2
+ 
+-all: check_dependencies jack_capture
++all: check_dependencies jack_capture jack_capture_gui2
+ 
+ install: $(targets)
+ 	install -d $(DESTDIR)$(bindir)
+@@ -52,11 +52,10 @@
+ 
+ 
+ jack_capture: setformat.c jack_capture.c vringbuffer.c upwaker.c osc.c Makefile das_config.h config_flags
+-	$(CC) $(COMPILEFLAGS) jack_capture.c vringbuffer.c upwaker.c osc.c -o jack_capture $(LINKFLAGS) `cat config_flags`
+-
++	$(CC) jack_capture.c vringbuffer.c upwaker.c osc.c $(COMPILEFLAGS) $(LINKFLAGS) $(cat config_flags) -o jack_capture
+ 
+ jack_capture_gui2: jack_capture_gui2.cpp
+-	$(CPP) $(CPPFLAGS) $(OPTIMIZE) jack_capture_gui2.cpp $(LDFLAGS) `pkg-config --libs --cflags gtk+-2.0` -o jack_capture_gui2
++	$(CPP) jack_capture_gui2.cpp $(LDFLAGS) $(CPPFLAGS) $(OPTIMIZE) `pkg-config --libs --cflags gtk+-2.0` -o jack_capture_gui2
+ 
+ config_flags: Makefile das_config.h
+ 	cat das_config.h |grep COMPILEFLAGS|sed s/\\/\\/COMPILEFLAGS//|tr '\n' ' ' >config_flags
